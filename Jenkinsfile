@@ -15,14 +15,16 @@ pipeline {
 
         stage("Build") {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                sh '''
+                cd Dockerfile
+                docker build -t ${IMAGE_NAME}:latest .
+                '''
             }
         }
 
         stage("Test") {
             steps {
                 echo "Tests developer likh ke dega 🙂"
-                // sh "npm test"
             }
         }
 
@@ -35,9 +37,9 @@ pipeline {
                 )]) {
 
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker tag ${IMAGE_NAME}:latest $DOCKER_USER/${IMAGE_NAME}:latest
-                        docker push $DOCKER_USER/${IMAGE_NAME}:latest
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker tag ${IMAGE_NAME}:latest $DOCKER_USER/${IMAGE_NAME}:latest
+                    docker push $DOCKER_USER/${IMAGE_NAME}:latest
                     '''
                 }
             }
@@ -45,7 +47,10 @@ pipeline {
 
         stage("Deploy") {
             steps {
-                sh "docker compose up -d"
+                sh '''
+                cd Dockerfile
+                docker compose up -d
+                '''
             }
         }
     }
